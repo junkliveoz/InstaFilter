@@ -7,12 +7,20 @@
 
 import SwiftUI
 
-struct ContentUnavailable: View {
+struct ContentUnavailableDemo: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        ContentUnavailableView {
+            Label("No snippets", systemImage: "swift")
+        } description: { Text("You don't have any saved snippets yet")
+        } actions: {
+            Button("Create snippet") {
+                
+            }
+            .buttonStyle(.borderedProminent)
+        }
     }
 }
 
 #Preview {
-    ContentUnavailable()
+    ContentUnavailableDemo()
 }

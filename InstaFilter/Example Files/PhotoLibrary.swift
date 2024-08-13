@@ -13,7 +13,30 @@ struct PhotoLibrary: View {
     @State private var selectedImages = [Image]()
     
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            PhotosPicker(selection: $pickerItems, maxSelectionCount: 3, matching: .any(of: [.images, .not(.screenshots)])) {
+                Label("Select a picture", systemImage: "photo")
+            }
+            
+            ScrollView {
+                ForEach(0..<selectedImages.count, id: \.self) { i in
+                    selectedImages[i]
+                        .resizable()
+                        .scaledToFit()
+                }
+            }
+        }
+        .onChange(of: pickerItems) {
+            Task {
+                selectedImages.removeAll()
+                
+                for item in pickerItems {
+                    if let loadedImage = try await item.loadTransferable(type: Image.self) {
+                        selectedImages.append(loadedImage)
+                    }
+                }
+            }
+        }
     }
 }
 
