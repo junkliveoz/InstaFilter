@@ -16,8 +16,12 @@ struct ContentView: View {
     
     @State private var processedImage: Image?
     @State private var filterIntensity = 0.5
+    @State private var filterRadius = 0.5
     @State private var selectedItem: PhotosPickerItem?
-    @State private var showingFilters = false
+    @State private var showingFilterOne = false
+    @State private var showingFilterTwo = false
+    @State private var filterOne = "Change Filter"
+    @State private var filterTwo = "Change Filter"
     
     @AppStorage("filterCount") var filterCount = 0
     @Environment(\.requestReview) var requestReview
@@ -28,6 +32,11 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                if let processedImage {
+                    ShareLink(item: processedImage, preview: SharePreview("Instafilter Image", image: processedImage)) {
+                        Label("Click to share", systemImage: "photo")
+                    }
+                }
                 Spacer ()
                 
                 PhotosPicker(selection: $selectedItem) {
@@ -48,38 +57,99 @@ struct ContentView: View {
                     Text("Intensity")
                     Slider(value: $filterIntensity)
                         .onChange(of: filterIntensity, applyProcessing)
+                        .disabled(filterOne == "Change Filter")
+                }
+                HStack {
+                    Button(filterOne) {
+                        changeFilter(filterNum: 1)
+                    }
+                    .disabled(processedImage == nil)
+                    
+                    Spacer()
                 }
                 
                 HStack {
-                    Button("Change Filter", action: changeFilter)
-                    
-                    Spacer()
-                    
-                    
-                    if let processedImage {
-                        ShareLink(item: processedImage, preview: SharePreview("Instafilter Image", image: processedImage)) {
-                            Label("Click to share", systemImage: "photo")
-                        }
-                    }
+                    Text("Radius")
+                    Slider(value: $filterRadius)
+                        .onChange(of: filterRadius, applyProcessing)
+                        .disabled(filterTwo == "Change Filter")
                 }
+                
+                HStack {
+                    Button(filterTwo) {
+                        changeFilter(filterNum: 2)
+                    }
+                        .disabled(processedImage == nil)
+                    Spacer()
+                }
+                
+                
             }
-            .padding([.horizontal, .bottom])
-            .navigationTitle("Instafilter")
-            .confirmationDialog("Select a filter", isPresented: $showingFilters) {
-                Button("Crystallize") { setFilter(CIFilter.crystallize())}
-                Button("Edges") { setFilter(CIFilter.edges())}
-                Button("Gaussian Blur") { setFilter(CIFilter.gaussianBlur())}
-                Button("Pixellate") { setFilter(CIFilter.pixellate())}
-                Button("Sepia Tone") { setFilter(CIFilter.sepiaTone())}
-                Button("Unsharp Mark") { setFilter(CIFilter.unsharpMask())}
-                Button("Vignette") { setFilter(CIFilter.vignette())}
-                Button("Cancel", role: .cancel) { }
+        }
+        .padding([.horizontal, .bottom])
+        .navigationTitle("Instafilter")
+        .confirmationDialog("Select a filter", isPresented: $showingFilterOne) {
+            Button("Edges") {
+                setFilter(CIFilter.edges())
+                filterOne = "Edges"
             }
+            Button("Dot Screen") {
+                setFilter(CIFilter.dotScreen())
+                filterOne = "Dot Screen"
+            }
+            Button("Pixellate") {
+                setFilter(CIFilter.pixellate())
+                filterOne = "Pixellate"
+            }
+            Button("Sepia Tone") {
+                setFilter(CIFilter.sepiaTone())
+                filterOne = "Sepia Tone"
+            }
+            Button("Unsharp Mark") {
+                setFilter(CIFilter.unsharpMask())
+                filterOne = "Unsharp Mark"
+            }
+            Button("Vignette") { 
+                setFilter(CIFilter.vignette())
+                filterOne = "Vignette"
+            }
+            Button("Cancel", role: .cancel) { }
+        }
+        .confirmationDialog("Select a filter", isPresented: $showingFilterTwo) {
+            Button("Crystallize") {
+                setFilter(CIFilter.crystallize())
+                filterTwo = "Crystallize"
+            }
+            Button("Gaussian Blur") {
+                setFilter(CIFilter.gaussianBlur())
+                filterTwo = "Gaussian Blur"
+            }
+            Button("Bokeh Blur") {
+                setFilter(CIFilter.bokehBlur())
+                filterTwo = "Bokeh Blur"
+            }
+            Button("Pinch Distortion") {
+                setFilter(CIFilter.pinchDistortion())
+                filterTwo = "Pinch Distortion"
+            }
+            Button("Unsharp Mark") {
+                setFilter(CIFilter.unsharpMask())
+                filterTwo = "Unsharp Mark"
+            }
+            Button("Zoom Blur") {
+                setFilter(CIFilter.zoomBlur())
+                filterTwo = "Zoom Blur"
+            }
+            Button("Cancel", role: .cancel) { }
         }
     }
     
-    func changeFilter() {
-        showingFilters = true
+    func changeFilter(filterNum: Int) {
+        if filterNum == 1 {
+            showingFilterOne = true
+        } else if filterNum == 2 {
+            showingFilterTwo = true
+        }
     }
     
     func loadImage() {
@@ -100,7 +170,7 @@ struct ContentView: View {
         if inputKeys.contains(kCIInputIntensityKey) {
             currentFilter.setValue(filterIntensity, forKey: kCIInputIntensityKey) }
         if inputKeys.contains(kCIInputRadiusKey) {
-            currentFilter.setValue(filterIntensity * 200, forKey: kCIInputRadiusKey) }
+            currentFilter.setValue(filterRadius * 200, forKey: kCIInputRadiusKey) }
         if inputKeys.contains(kCIInputScaleKey) {
             currentFilter.setValue(filterIntensity * 10, forKey: kCIInputScaleKey) }
         
